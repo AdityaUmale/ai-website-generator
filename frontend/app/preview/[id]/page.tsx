@@ -17,7 +17,7 @@ export default function PreviewPage() {
 
   const [website, setWebsite] = useState<GeneratedWebsite | null>(null);
   const [edits, setEdits] = useState<ElementEdit[]>([]);
-  const [currentPage, setCurrentPage] = useState('index');
+  const [currentPage, setCurrentPage] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editingElement, setEditingElement] = useState<{
@@ -31,6 +31,17 @@ export default function PreviewPage() {
       loadWebsite();
     }
   }, [websiteId]);
+
+  // Set default page when website loads
+  useEffect(() => {
+    if (website && Object.keys(website.pages).length > 0 && !currentPage) {
+      const pageNames = Object.keys(website.pages);
+      const defaultPage = pageNames.includes('home') ? 'home' : 
+                        pageNames.includes('index') ? 'index' : 
+                        pageNames[0];
+      setCurrentPage(defaultPage);
+    }
+  }, [website, currentPage]);
 
   const loadWebsite = async () => {
     try {
