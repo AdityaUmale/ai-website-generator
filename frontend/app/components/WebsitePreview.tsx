@@ -1,5 +1,4 @@
 'use client';
-
 import { Dispatch, SetStateAction, useState, useEffect } from 'react';
 import { GeneratedWebsite, ElementEdit } from '@/types';
 import { Eye, Code } from 'lucide-react';
@@ -20,19 +19,18 @@ interface WebsitePreviewProps {
   onPageChange?: (pageName: string) => void;
 }
 
-export default function WebsitePreview({ 
-  website, 
-  currentPage, 
-  edits, 
+export default function WebsitePreview({
+  website,
+  currentPage,
+  edits,
   onElementClick,
-  onPageChange 
+  onPageChange
 }: WebsitePreviewProps) {
   const [viewMode, setViewMode] = useState<'preview' | 'code'>('preview');
   const [formattedCode, setFormattedCode] = useState<string>('');
 
   const applyEdits = (content: string): string => {
     let modifiedContent = content;
-    
     edits.forEach(edit => {
       if (edit.content) {
         const regex = new RegExp(
@@ -42,7 +40,6 @@ export default function WebsitePreview({
         modifiedContent = modifiedContent.replace(regex, `$1${edit.content}$3`);
       }
     });
-    
     return modifiedContent;
   };
 
@@ -86,7 +83,7 @@ export default function WebsitePreview({
   };
 
   const currentPageContent = website.pages[currentPage];
-
+  
   // Apply text edits and mark editable elements
   const processedContent = currentPageContent ? makeElementsEditable(applyEdits(currentPageContent)) : '';
 
@@ -121,7 +118,6 @@ export default function WebsitePreview({
 
         // Create minimalist Next.js page code without leaking internal prompts
         const pageCode = `'use client';
-
 import React from 'react';
 import { Metadata } from 'next';
 
@@ -139,7 +135,6 @@ export default ${pageDisplayName}Page;`;
         console.error('Formatting error:', error);
         // Fallback with basic structure
         const fallbackCode = `'use client';
-
 import React from 'react';
 
 const Page = ${currentPageContent};
@@ -172,7 +167,7 @@ export default Page;`;
 
   if (!currentPageContent) {
     return (
-      <div className="flex-1 bg-white rounded-lg shadow p-8 text-center">
+      <div className="flex-1 bg-white rounded-md border border-gray-200 p-8 text-center">
         <p className="text-gray-500">Page not found</p>
       </div>
     );
@@ -183,7 +178,6 @@ export default Page;`;
     const transpiled = Babel.transform(processedContent, {
       presets: ['react'],
     }).code;
-
     const ComponentFn = new Function('React', `return ${transpiled}`);
     DynamicPage = ComponentFn(React);
   } catch (err) {
@@ -198,14 +192,15 @@ export default Page;`;
   return (
     <>
       <div className="flex-1">
-        <div className="bg-white rounded-lg shadow">
+        <div className="bg-white rounded-md border border-gray-200">
+          {/* Header */}
           <div className="border-b border-gray-200 px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 {viewMode === 'preview' ? (
-                  <Eye className="w-4 h-4 mr-2 text-gray-500" />
+                  <Eye className="w-4 h-4 mr-2 text-gray-600" />
                 ) : (
-                  <Code className="w-4 h-4 mr-2 text-gray-500" />
+                  <Code className="w-4 h-4 mr-2 text-gray-600" />
                 )}
                 <span className="text-sm font-medium text-gray-900">
                   {currentPage === 'index' ? 'Home' : currentPage.charAt(0).toUpperCase() + currentPage.slice(1)} Page - {viewMode.charAt(0).toUpperCase() + viewMode.slice(1)} Mode
@@ -213,39 +208,37 @@ export default Page;`;
               </div>
               <button
                 onClick={toggleViewMode}
-                className="text-sm text-blue-600 hover:text-blue-800"
+                className="text-sm text-gray-700 hover:text-gray-900 px-3 py-1 rounded-md hover:bg-gray-50 transition-colors"
               >
                 Switch to {viewMode === 'preview' ? 'Code' : 'Preview'}
               </button>
             </div>
           </div>
-          
+
+          {/* Content */}
           <div className="p-4">
             {viewMode === 'preview' ? (
-              <div 
-                className="preview-container bg-white min-h-96"
+              <div
+                className="preview-container bg-white min-h-96 border border-gray-200 rounded-md"
                 onClick={(e) => {
                   const target = e.target as HTMLElement;
-                  
                   console.log('Click detected on:', target);
                   console.log('Target classes:', target.className);
                   console.log('Target data-edit-id:', target.getAttribute('data-edit-id'));
-                  
+
                   // Handle navigation clicks first
                   const navPage = target.getAttribute('data-nav-page') || target.closest('[data-nav-page]')?.getAttribute('data-nav-page');
                   if (navPage && onPageChange) {
                     e.preventDefault();
                     e.stopPropagation();
-                    
                     let targetPage = navPage.toLowerCase();
                     if (targetPage === 'home') targetPage = 'index';
-                    
                     if (website.pages[targetPage]) {
                       onPageChange(targetPage);
                       return;
                     }
                   }
-                  
+
                   // Handle editable element clicks
                   const editableElement = target.closest('.editable-element') as HTMLElement;
                   console.log('Found editable element:', editableElement);
@@ -263,14 +256,14 @@ export default Page;`;
                 <DynamicPage />
               </div>
             ) : (
-              <div className="flex h-[600px] bg-gray-900 rounded-lg overflow-hidden">
+              <div className="flex h-[600px] bg-gray-900 rounded-md overflow-hidden border border-gray-300">
                 {/* File Tree Sidebar */}
-                <FileTreeView 
+                <FileTreeView
                   pages={Object.keys(website.pages)}
                   currentPage={currentPage}
                   onPageSelect={(page) => onPageChange && onPageChange(page)}
                 />
-                
+
                 {/* Code Editor Area */}
                 <div className="flex-1 flex flex-col">
                   {/* IDE Header */}
@@ -287,7 +280,7 @@ export default Page;`;
                       <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                     </div>
                   </div>
-                  
+
                   {/* Code Content */}
                   <div className="flex-1 overflow-auto">
                     <SyntaxHighlighter
@@ -313,19 +306,17 @@ export default Page;`;
       {/* Inject styles */}
       <style jsx global>{`
         ${website.styles}
-        
         .editable-element:hover {
-          outline: 2px solid #3b82f6;
+          outline: 2px solid #374151;
           outline-offset: 2px;
           cursor: pointer;
         }
-        
         .editable-element:hover::after {
           content: 'Click to edit';
           position: absolute;
           top: -30px;
           right: 0;
-          background: #3b82f6;
+          background: #374151;
           color: white;
           padding: 4px 8px;
           border-radius: 4px;
@@ -333,18 +324,15 @@ export default Page;`;
           white-space: nowrap;
           z-index: 10;
         }
-        
         /* Navigation element styles */
         [data-nav-page] {
           cursor: pointer;
           transition: all 0.2s ease;
         }
-        
         [data-nav-page]:hover {
           opacity: 0.8;
           transform: translateY(-1px);
         }
-        
         /* Prevent text selection on navigation elements */
         [data-nav-page] {
           user-select: none;

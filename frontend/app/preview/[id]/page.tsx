@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { websiteApi } from '@/lib/api';
 import { GeneratedWebsite, ElementEdit } from '@/types';
-import { ArrowLeft, Edit3 } from 'lucide-react';
+import { ArrowLeft, Edit3, Loader2, AlertCircle } from 'lucide-react';
 import PageNavigation from '../../components/PageNavigation';
 import WebsitePreview from '../../components/WebsitePreview';
 import EditModal from '../../components/EditModal';
-import WebsiteInfo from '../../components/WebsiteInfo';
+
 
 export default function PreviewPage() {
   const params = useParams();
@@ -84,24 +84,32 @@ export default function PreviewPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-gray-900 mx-auto mb-4" />
+          <p className="text-gray-600">Loading your website...</p>
+        </div>
       </div>
     );
   }
 
   if (error || !website) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen">
-        <div className="text-red-600 mb-4">
-          <p>{error || 'Website not found'}</p>
+      <div className="min-h-screen bg-white">
+        <div className="max-w-2xl mx-auto px-6 py-16">
+          <div className="text-center">
+            <div className="flex items-center justify-center mb-4">
+              <AlertCircle className="w-6 h-6 text-red-600 mr-2" />
+              <p className="text-red-700">{error || 'Website not found'}</p>
+            </div>
+            <button
+              onClick={handleBack}
+              className="bg-gray-900 text-white px-4 py-2 rounded-md font-medium hover:bg-gray-800 transition-colors"
+            >
+              Back to Generator
+            </button>
+          </div>
         </div>
-        <button
-          onClick={handleBack}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-        >
-          Go Back
-        </button>
       </div>
     );
   }
@@ -109,33 +117,33 @@ export default function PreviewPage() {
   const pageNames = Object.keys(website.pages);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
+      <div className="border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex items-center justify-between py-6">
             <div className="flex items-center">
               <button
                 onClick={handleBack}
-                className="flex items-center text-gray-600 hover:text-gray-900 transition-colors mr-6 px-3 py-2 rounded-lg hover:bg-gray-100"
+                className="flex items-center text-gray-600 hover:text-gray-900 transition-colors mr-8 px-3 py-2 rounded-md hover:bg-gray-50"
               >
-                <ArrowLeft className="w-5 h-5 mr-2" />
+                <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Generator
               </button>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">Website Preview & Editor</h1>
-                <p className="text-sm text-gray-500 mt-1">
+                <h1 className="text-2xl font-medium text-gray-900">Website Preview & Editor</h1>
+                <p className="text-gray-600 mt-1">
                   Navigate between pages and click any element to edit content
                 </p>
               </div>
             </div>
             
             <div className="flex items-center space-x-6">
-              <div className="flex items-center text-sm text-gray-600 bg-blue-50 px-3 py-2 rounded-lg">
-                <Edit3 className="w-4 h-4 mr-2 text-blue-600" />
+              <div className="flex items-center text-sm text-gray-700 bg-gray-50 px-3 py-2 rounded-md border border-gray-200">
+                <Edit3 className="w-4 h-4 mr-2" />
                 <span>Click elements to edit</span>
               </div>
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-gray-600">
                 <span className="font-medium">{pageNames.length}</span> pages generated
               </div>
             </div>
@@ -143,11 +151,10 @@ export default function PreviewPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Website Info */}
-        <WebsiteInfo pageCount={pageNames.length} currentPage={currentPage} />
+      <div className="max-w-7xl mx-auto px-6 py-8">
+
         
-        <div className="flex gap-6">
+        <div className="flex gap-8">
           {/* Page Navigation */}
           <PageNavigation
             pages={pageNames}
