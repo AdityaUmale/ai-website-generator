@@ -10,6 +10,7 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import prettier from 'prettier/standalone';
 import * as babel from 'prettier/plugins/babel';
 import * as estree from 'prettier/plugins/estree';
+import FileTreeView from './FileTreeView';
 
 interface WebsitePreviewProps {
   website: GeneratedWebsite;
@@ -79,7 +80,11 @@ export default function WebsitePreview({
   useEffect(() => {
     const formatCode = async () => {
       try {
-        // First, format the original content
+        // Get the page name for proper file naming
+        const pageName = currentPage === 'index' ? 'page' : currentPage;
+        const pageDisplayName = currentPage === 'index' ? 'Home' : currentPage.charAt(0).toUpperCase() + currentPage.slice(1);
+        
+        // Format the original component content
         const formattedOriginal = await prettier.format(currentPageContent, {
           parser: 'babel',
           plugins: [babel.default, estree.default],
@@ -88,40 +93,41 @@ export default function WebsitePreview({
           singleQuote: true,
           printWidth: 80,
         });
-    
-        // Wrap in Next.js page structure
-        const wrappedCode = `'use client';
-    
-        import React from 'react';
-        // Add other common imports as needed, e.g.
-        // import Link from 'next/link';
-        // import Image from 'next/image';
-    
-        const Page = ${formattedOriginal};
-    
-        export default Page;`;
-    
-        // Format the wrapped code
-        const formattedWrapped = await prettier.format(wrappedCode, {
-          parser: 'babel',
-          plugins: [babel.default, estree.default],
-          semi: true,
-          trailingComma: 'es5',
-          singleQuote: true,
-          printWidth: 80,
-        });
-    
-        setFormattedCode(formattedWrapped);
+
+        // Create minimalist Next.js page code without leaking internal prompts
+        const pageCode = `'use client';
+
+import React from 'react';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: '${pageDisplayName} | Your Website',
+  description: 'AI generated page',
+};
+
+const ${pageDisplayName}Page = ${formattedOriginal};
+
+export default ${pageDisplayName}Page;`;
+
+        setFormattedCode(pageCode);
       } catch (error) {
         console.error('Formatting error:', error);
-        setFormattedCode(currentPageContent); // Fallback
+        // Fallback with basic structure
+        const fallbackCode = `'use client';
+
+import React from 'react';
+
+const Page = ${currentPageContent};
+
+export default Page;`;
+        setFormattedCode(fallbackCode);
       }
     };
-  
+
     if (currentPageContent) {
       formatCode();
     }
-  }, [currentPageContent]);
+  }, [currentPageContent, currentPage]);
 
   if (!currentPageContent) {
     return (
@@ -209,13 +215,47 @@ export default function WebsitePreview({
                 <DynamicPage />
               </div>
             ) : (
-              <div className="bg-gray-800 rounded-lg overflow-auto max-h-96">
-                <SyntaxHighlighter
-                  language="jsx"
-                  style={vscDarkPlus}
-                  showLineNumbers
-                  children={formattedCode}
+              <div className="flex h-[600px] bg-gray-900 rounded-lg overflow-hidden">
+                {/* File Tree Sidebar */}
+                <FileTreeView 
+                  pages={Object.keys(website.pages)}
+                  currentPage={currentPage}
+                  onPageSelect={(page) => onPageChange && onPageChange(page)}
                 />
+                
+                {/* Code Editor Area */}
+                <div className="flex-1 flex flex-col">
+                  {/* IDE Header */}
+                  <div className="flex items-center justify-between p-3 border-b border-gray-700 bg-gray-800">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                      <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <span className="text-gray-400 text-xs font-mono">
+                        app/{currentPage === 'index' ? 'page.tsx' : `${currentPage}/page.tsx`}
+                      </span>
+                      <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                    </div>
+                  </div>
+                  
+                  {/* Code Content */}
+                  <div className="flex-1 overflow-auto">
+                    <SyntaxHighlighter
+                      language="typescript"
+                      style={vscDarkPlus}
+                      showLineNumbers
+                      customStyle={{
+                        margin: 0,
+                        background: 'transparent',
+                        fontSize: '13px',
+                        height: '100%',
+                      }}
+                      children={formattedCode}
+                    />
+                  </div>
+                </div>
               </div>
             )}
           </div>
