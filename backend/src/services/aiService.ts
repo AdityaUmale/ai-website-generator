@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
+import { jsonrepair } from 'jsonrepair';
 
 dotenv.config();
 
@@ -42,20 +43,27 @@ export class AIService {
 
       console.log('Raw response length:', response.length);
       
+      let repaired;
+      try {
+        // Optional: basic trim
+        let trimmed = response.trim();
+        if (!trimmed.startsWith('{')) trimmed = trimmed.substring(trimmed.indexOf('{'));
+        if (!trimmed.endsWith('}')) trimmed = trimmed.substring(0, trimmed.lastIndexOf('}') + 1);
+        
+        repaired = jsonrepair(trimmed);
+        console.log('Repaired response length:', repaired.length);
+      } catch (repairError) {
+        console.error('Repair error:', repairError);
+        throw new Error('Failed to repair JSON response');
+      }
       
       let generatedCode;
       try {
-        generatedCode = JSON.parse(response);
+        generatedCode = JSON.parse(repaired);
       } catch (parseError) {
-        console.error('JSON Parse Error:', parseError);
-        console.error('Raw response:', response.substring(0, 500) + '...');
-        
-        // Try alternative parsing approach
-        generatedCode = this.parseComplexJson(response);
-        if (!generatedCode) {
-          throw new Error('Invalid JSON response from OpenAI');
-        }
-        console.log('✅ Successfully parsed with alternative method');
+        console.error('JSON Parse Error after repair:', parseError);
+        console.error('Repaired response:', repaired.substring(0, 500) + '...');
+        throw new Error('Invalid JSON after repair');
       }
 
       console.log('✅ Successfully parsed response');
@@ -71,13 +79,10 @@ export class AIService {
     }
   }
 
-  private static parseComplexJson(response: string): any {
-    // Implement a more robust JSON parsing approach here
-    // For example, you could use a library like json-bigint or json5
-    // or implement a custom parsing strategy
-    // For now, just return null to indicate failure
-    return null;
-  }
+  // Remove parseComplexJson as it's not needed now
+  // private static parseComplexJson(response: string): any {
+  //   return null;
+  // }
 
   private static cleanJsonResponse(response: string): string {
     // Remove any text before the first { and after the last }
@@ -90,17 +95,18 @@ export class AIService {
     
     let cleaned = response.substring(startIndex, endIndex + 1);
     
-    // Fix common JSON issues in JSX strings
-    cleaned = cleaned
-      // Replace unescaped backslashes followed by characters (but not already escaped ones)
-      .replace(/\\(?!["\\/bfnrt])/g, '\\\\')
-      // Replace actual newlines with \n
-      .replace(/\n/g, ' ')
-      .replace(/\r/g, ' ')
-      // Replace multiple spaces with single space
-      .replace(/\s+/g, ' ')
-      // Fix unescaped quotes in JSX strings (basic attempt)
-      .replace(/([^\\])"/g, '$1\\"');
+    // Escape newlines and carriage returns
+    cleaned = cleaned.replace(/\n/g, '\\n').replace(/\r/g, '\\r');
+    
+    // Escape unescaped double quotes (basic regex, may not handle all cases but better than nothing)
+    // This assumes strings are double-quoted; it escapes " inside them
+    cleaned = cleaned.replace(/([^\\])"/g, '$1\\"');
+    
+    // Replace multiple spaces with single space (optional, for compactness)
+    cleaned = cleaned.replace(/\s+/g, ' ');
+    
+    // Escape lone backslashes
+    cleaned = cleaned.replace(/\\(?![\/bfnrtu"])/g, '\\\\');
     
     return cleaned;
   }
