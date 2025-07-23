@@ -79,11 +79,7 @@ export class AIService {
     }
   }
 
-  // Remove parseComplexJson as it's not needed now
-  // private static parseComplexJson(response: string): any {
-  //   return null;
-  // }
-
+  
   private static cleanJsonResponse(response: string): string {
     // Remove any text before the first { and after the last }
     const startIndex = response.indexOf('{');
