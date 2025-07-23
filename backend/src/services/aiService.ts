@@ -28,8 +28,8 @@ export class AIService {
             content: prompt
           }
         ],
-        temperature: 0.3, // Lower temperature for more consistent output
-        max_tokens: 4000, // Increased for more comprehensive responses
+        temperature: 0.3, 
+        max_tokens: 4000, 
       });
 
       console.log('✅ OpenAI API call successful');
@@ -42,7 +42,7 @@ export class AIService {
 
       console.log('Raw response length:', response.length);
       
-      // Try to parse the JSON response
+      
       let generatedCode;
       try {
         generatedCode = JSON.parse(response);
@@ -133,39 +133,94 @@ Return ONLY a valid JSON object with this structure:
     "page1": "() => { return (/* JSX for page1 */); }",
     // Add more pages as needed based on description
   },
+  "components": {
+    // Optional: include shared components if needed
+    // "Layout": "({ children }) => { return (/* JSX layout wrapper */); }"
+  },
   "styles": "/* Global CSS styles */"
 }
 
 CRITICAL REQUIREMENTS:
 1. Generate functional React JSX components using modern syntax
 2. Use Tailwind CSS for styling with modern design patterns
-3. Add data-edit-id="unique-id" to all editable elements (headings, text, buttons)
+3. MANDATORY: Add data-edit-id="unique-id" to ALL text content elements - this is required for editing functionality
 4. Make it responsive and visually appealing
 5. Do NOT include any imports or 'export default' - write pure JSX functions
 6. Each page should be a function returning JSX that can be rendered directly
 
+EDITING REQUIREMENTS (CRITICAL FOR FUNCTIONALITY):
+7. Every heading (h1, h2, h3) must have data-edit-id="heading-name"
+8. Every paragraph and text content must have data-edit-id="text-name" 
+9. Every button text must have data-edit-id="button-name"
+10. Every brand/logo text must have data-edit-id="brand-name"
+11. Examples: <h1 data-edit-id="hero-title">Welcome</h1>, <p data-edit-id="hero-description">Text here</p>
+12. Without data-edit-id attributes, the editing feature will not work - this is mandatory
+
 NAVIGATION REQUIREMENTS:
-7. Include a professional navbar at the top of EVERY page with navigation links
-8. Add a footer section at the bottom of EVERY page
-9. On the home page, include prominent navigation buttons/cards to access other pages
-10. Use consistent navigation structure across all pages
-11. Make navigation visually appealing with hover effects and modern styling
-12. CRITICAL: Use data-nav-page="pagename" instead of href for navigation links
-13. Navigation should be buttons or clickable divs with data-nav-page attributes
-14. NEVER use <a href="/page"> - always use data-nav-page="page" for internal navigation
+13. Include a professional navbar at the top of EVERY page with navigation links
+14. Add a footer section at the bottom of EVERY page
+15. On the home page, include prominent navigation buttons/cards to access other pages
+16. Use consistent navigation structure across all pages
+17. Make navigation visually appealing with hover effects and modern styling
+18. CRITICAL: Use data-nav-page="pagename" instead of href for navigation links
+19. Navigation should be buttons or clickable divs with data-nav-page attributes
+20. NEVER use <a href="/page"> - always use data-nav-page="page" for internal navigation
 
 NAVIGATION EXAMPLES:
 - Navbar: <button data-nav-page="about" className="nav-link">About</button>
 - Footer: <div data-nav-page="contact" className="footer-link cursor-pointer">Contact</div>
 - Home buttons: <button data-nav-page="services" className="cta-button">Our Services</button>
 
-UI/UX REQUIREMENTS:
-15. Use modern color schemes and typography
-16. Include hero sections, call-to-action buttons, and engaging content
-17. Add appropriate icons and visual elements
-18. Ensure excellent mobile responsiveness
-19. Create professional layouts with proper spacing and visual hierarchy
-20. Use gradients, shadows, and modern CSS effects for visual appeal
+STRUCTURE REQUIREMENTS (apply to every site):
+21. OPTIONAL: You may include shared components (like Layout) in the "components" section if it helps create cleaner, more professional pages.
+22. Structure each page with:
+    • Header: flex container with brand name left, nav links right, proper padding
+    • Main content: FULL-HEIGHT sections for ALL pages (min-h-screen with flex centering), not just home page
+    • Footer: simple copyright notice
+23. If you don't provide shared components, make each page completely self-contained with inline structure.
+
+LAYOUT & SPACING REQUIREMENTS:
+-24. ALL main content sections must use min-h-screen or min-h-[80vh] to feel full and immersive (home, about, services, contact, etc.)
++24. CRITICAL: ALL pages must use min-h-screen for main content - this is mandatory, not optional. Each page should fill the entire viewport height.
+25. Use generous padding and margins: py-16, py-20, px-8, space-y-8, space-y-12
+26. Text should be large and impactful: text-4xl, text-5xl, text-6xl for headings
+27. Center content vertically and horizontally using flex utilities: flex items-center justify-center
+28. Make ALL pages feel spacious, not cramped - every page should fill the viewport height with proper content centering
+
+CONTENT REQUIREMENTS:
+29. Home page must include: large hero heading, compelling subtitle (2-3 lines), multiple CTA buttons, feature highlights or benefits section
+30. About page must include: company story, mission statement, team info, values or achievements
+31. Services page must include: service cards/grid, detailed descriptions, pricing or features, testimonials
+32. Contact page must include: contact form, address/location, phone/email, business hours, map or directions
+33. Each page should have substantial content - avoid single sentences or minimal text
+34. Include multiple sections per page: hero + features + testimonials + CTA sections
+
+VISUAL DESIGN REQUIREMENTS:
+35. Use professional, muted color schemes: subtle gradients (bg-gradient-to-r from-gray-50 to-gray-100), neutral tones (slate, gray, zinc, stone), minimal accent colors (blue-600, indigo-600)
+36. Add visual interest with: rounded corners (rounded-lg, rounded-xl), shadows (shadow-lg, shadow-xl), subtle borders
+37. Hero sections should have subtle background gradients or light gray tones, avoid bright colors
+38. Buttons should be elegant with: px-8 py-4, rounded-lg, subtle shadows, professional colors (gray-900, slate-700, blue-600)
+39. Include visual elements: subtle background patterns, colored sections, card layouts with shadows
+40. Use refined typography: font-medium, font-semibold, text-gray-700 for headings, text-gray-600 for descriptions
+41. Add subtle hover effects: hover:shadow-lg, hover:bg-gray-50, transition-all duration-200 (avoid dramatic scaling)
+
+DETAILED STYLING REQUIREMENTS (apply extensive Tailwind classes):
+42. Headers: bg-white shadow-sm border-b border-gray-200 px-8 py-4 flex justify-between items-center
+43. Brand/Logo: text-2xl font-bold text-gray-900 tracking-tight
+44. Navigation links: text-gray-600 hover:text-gray-900 px-4 py-2 rounded-md hover:bg-gray-50 transition-colors font-medium
+45. Hero sections: bg-gradient-to-br from-gray-50 to-white py-20 px-8 text-center space-y-8
+46. Main headings: text-5xl font-bold text-gray-900 leading-tight tracking-tight
+47. Subheadings: text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed
+48. CTA buttons: bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg shadow-lg hover:shadow-xl font-semibold transition-all
+49. Feature cards: bg-white rounded-xl shadow-lg p-8 border border-gray-100 hover:shadow-xl transition-shadow
+50. Card headings: text-xl font-semibold text-gray-900 mb-3
+51. Card descriptions: text-gray-600 leading-relaxed
+52. Sections: py-16 px-8 space-y-12
+53. Footers: bg-gray-50 border-t border-gray-200 py-8 text-center text-gray-600
+
+STYLE NOTE: Use Tailwind utility classes for spacing/typography; keep color palette neutral/professional.
+
+54. Ensure overall design remains clean, modern, and responsive.
 `;
   }
 

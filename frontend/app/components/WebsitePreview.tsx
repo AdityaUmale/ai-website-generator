@@ -44,20 +44,20 @@ export default function WebsitePreview({
   };
 
   const makeElementsEditable = (content: string): string => {
+    // Simple approach: just add editable-element class to any element with data-edit-id
     return content.replace(
-      /data-edit-id=(['"])([^'"]*)\1([^>]*)>/g,
-      (match, quote, editId, attributes) => {
-        // Check for both class and className attributes
-        const hasClassName = /className=(['"])[^'"]*\1/.test(attributes);
-        const hasClass = /class=(['"])[^'"]*\1/.test(attributes);
-        
-        if (hasClassName) {
-          return `data-edit-id=${quote}${editId}${quote}${attributes.replace(/className=(['"])([^'"]*)\1/, `className=$1$2 editable-element$1`)}>`;
-        } else if (hasClass) {
-          return `data-edit-id=${quote}${editId}${quote}${attributes.replace(/class=(['"])([^'"]*)\1/, `class=$1$2 editable-element$1`)}>`;
-        } else {
-          return `data-edit-id=${quote}${editId}${quote}${attributes} className="editable-element">`;
+      /(<[^>]*data-edit-id=['"][^'"]*['"][^>]*?)(\s*\/?>)/g,
+      (match, elementStart, closing) => {
+        // If it already has editable-element class, don't add it again
+        if (elementStart.includes('editable-element')) {
+          return match;
         }
+        // Don't add className to self-closing tags (like input, img, br, hr)
+        if (closing.includes('/')) {
+          return match; // Return unchanged for self-closing tags
+        }
+        // Add the class at the end for regular elements
+        return `${elementStart} className="editable-element"${closing}`;
       }
     );
   };
@@ -175,7 +175,17 @@ export default Page;`;
 
   let DynamicPage;
   try {
-    const transpiled = Babel.transform(processedContent, {
+    // Inject any components provided by the LLM
+    let componentsCode = '';
+    if (website.components) {
+      Object.entries(website.components).forEach(([name, code]) => {
+        componentsCode += `const ${name} = ${code};\n`;
+      });
+    }
+    
+    const codeWithComponents = componentsCode + processedContent;
+
+    const transpiled = Babel.transform(codeWithComponents, {
       presets: ['react'],
     }).code;
     const ComponentFn = new Function('React', `return ${transpiled}`);
@@ -219,7 +229,7 @@ export default Page;`;
           <div className="p-4">
             {viewMode === 'preview' ? (
               <div
-                className="preview-container bg-white min-h-96 border border-gray-200 rounded-md"
+                className="preview-container bg-white min-h-screen border border-gray-200 rounded-md"
                 onClick={(e) => {
                   const target = e.target as HTMLElement;
                   console.log('Click detected on:', target);

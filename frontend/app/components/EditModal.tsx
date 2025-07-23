@@ -13,10 +13,24 @@ interface EditModalProps {
 
 export default function EditModal({ elementId, currentContent, currentStyles = {}, onSave, onClose }: EditModalProps) {
   const [content, setContent] = useState(currentContent);
-  const [styles, setStyles] = useState<Record<string, any>>(currentStyles);
+  const [stylesText, setStylesText] = useState(
+    Object.entries(currentStyles).map(([k, v]) => `${k}: ${v}`).join('\n')
+  );
 
   const handleSave = () => {
-    onSave(elementId, content, styles);
+    // Parse styles text into object
+    const stylesObj: Record<string, any> = {};
+    stylesText.split('\n').forEach(line => {
+      const colonIndex = line.indexOf(':');
+      if (colonIndex > 0) {
+        const prop = line.substring(0, colonIndex).trim();
+        const val = line.substring(colonIndex + 1).trim();
+        if (prop && val) {
+          stylesObj[prop] = val;
+        }
+      }
+    });
+    onSave(elementId, content, stylesObj);
   };
 
   return (
@@ -47,16 +61,8 @@ export default function EditModal({ elementId, currentContent, currentStyles = {
           </label>
           <textarea
             id="styles"
-            value={Object.entries(styles).map(([k,v])=>`${k}:${v}`).join('\n')}
-            onChange={(e)=>{
-              const lines=e.target.value.split('\n');
-              const newStyles:Record<string,any>={};
-              lines.forEach(line=>{
-                const [prop,val]=line.split(':');
-                if(prop && val){newStyles[prop.trim()]=val.trim();}
-              });
-              setStyles(newStyles);
-            }}
+            value={stylesText}
+            onChange={(e) => setStylesText(e.target.value)}
             className="w-full h-24 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none mt-1"
           />
         </div>

@@ -6,7 +6,7 @@ import { WebsiteDescription, GeneratedWebsite } from '../types/website';
 
 const router = Router();
 
-// Generate website from description
+
 router.post('/generate', async (req: Request, res: Response) => {
   try {
     const { description }: WebsiteDescription = req.body;
@@ -49,7 +49,7 @@ router.post('/generate', async (req: Request, res: Response) => {
   }
 });
 
-// Get website by ID
+
 router.get('/:id', (req: Request, res: Response) => {
   const { id } = req.params;
   const website = storageService.getWebsite(id);
@@ -58,7 +58,7 @@ router.get('/:id', (req: Request, res: Response) => {
     return res.status(404).json({ error: 'Website not found' });
   }
 
-  // Apply any edits
+
   const edits = storageService.getEdits(id);
   
   res.json({
@@ -68,7 +68,7 @@ router.get('/:id', (req: Request, res: Response) => {
   });
 });
 
-// Get specific page content
+
 router.get('/:id/page/:pageName', (req: Request, res: Response) => {
   const { id, pageName } = req.params;
   const website = storageService.getWebsite(id);
@@ -89,7 +89,7 @@ router.get('/:id/page/:pageName', (req: Request, res: Response) => {
   });
 });
 
-// Edit element
+
 router.put('/:id/edit', (req: Request, res: Response) => {
   const { id } = req.params;
   const { elementId, content, styles } = req.body;
@@ -99,7 +99,7 @@ router.put('/:id/edit', (req: Request, res: Response) => {
     return res.status(404).json({ error: 'Website not found' });
   }
 
-  // Save the edit
+ 
   storageService.saveEdit({
     siteId: id,
     elementId,

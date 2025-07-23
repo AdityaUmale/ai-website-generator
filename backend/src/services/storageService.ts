@@ -1,6 +1,6 @@
 import { GeneratedWebsite, ElementEdit } from '../types/website';
 
-// Simple in-memory storage for MVP
+// Simple in-memory storage 
 class StorageService {
   private websites: Map<string, GeneratedWebsite> = new Map();
   private edits: Map<string, ElementEdit[]> = new Map();

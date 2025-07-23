@@ -18,6 +18,7 @@ export interface GenerationResponse {
 export interface GeneratedWebsite {
   id: string;
   pages: Record<string, string>;
+  components?: Record<string, string>;
   styles: string;
   timestamp: Date;
 }
