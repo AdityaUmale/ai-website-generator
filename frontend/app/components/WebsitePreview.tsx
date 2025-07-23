@@ -3,6 +3,8 @@
 import { Dispatch, SetStateAction } from 'react';
 import { GeneratedWebsite, ElementEdit } from '@/types';
 import { Eye } from 'lucide-react';
+import * as Babel from '@babel/standalone';
+import React from 'react';
 
 interface WebsitePreviewProps {
   website: GeneratedWebsite;
@@ -52,6 +54,19 @@ export default function WebsitePreview({
     );
   }
 
+  let DynamicPage;
+  try {
+    const transpiled = Babel.transform(currentPageContent, {
+      presets: ['react'],
+    }).code;
+
+    const ComponentFn = new Function('React', `return ${transpiled}`);
+    DynamicPage = ComponentFn(React);
+  } catch (err) {
+    console.error('JSX render error:', err);
+    return <div>Error rendering page</div>;
+  }
+
   return (
     <>
       <div className="flex-1">
@@ -67,22 +82,7 @@ export default function WebsitePreview({
           
           <div className="p-4">
             <div className="preview-container bg-white min-h-96">
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: makeElementsEditable(applyEdits(currentPageContent))
-                }}
-                onClick={(e) => {
-                  const target = e.target as HTMLElement;
-                  const editId = target.getAttribute('data-edit-id');
-                  if (editId) {
-                    e.preventDefault();
-                    onElementClick({ 
-                      elementId: editId, 
-                      content: target.textContent || '' 
-                    });
-                  }
-                }}
-              />
+              <DynamicPage />
             </div>
           </div>
         </div>

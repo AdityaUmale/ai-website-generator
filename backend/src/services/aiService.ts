@@ -74,23 +74,21 @@ Generate a complete Next.js website based on this description: "${description}"
 Return ONLY a valid JSON object with this exact structure:
 {
   "pages": {
-    "index": "<!-- Next.js page content for home -->",
-    "about": "<!-- Next.js page content for about -->",
-    "contact": "<!-- Next.js page content for contact -->"
+    "index": "() => { return (/* JSX for home page */); }",
+    "about": "() => { return (/* JSX for about page */); }",
+    "contact": "() => { return (/* JSX for contact page */); }"
   },
   "styles": "/* Global CSS styles */"
 }
 
 Requirements:
-1. Generate functional React components using modern syntax
+1. Generate functional React JSX components using modern syntax
 2. Use Tailwind CSS for styling
-3. Add data-edit-id="unique-id" to all editable elements (headings, text, buttons)
+3. Add data-edit-id=\"unique-id\" to all editable elements (headings, text, buttons)
 4. Make it responsive and visually appealing
-5. Include proper Next.js structure with export default
-6. Don't include any markdown formatting, just clean HTML/JSX
-7. Each page should be a complete Next.js page component
-
-Focus on clean, professional design with good UX.
+5. Do NOT include any imports or 'export default' - write pure JSX functions
+6. Each page should be a function returning JSX that can be rendered directly
+7. Focus on clean, professional design with good UX.
 `;
   }
 }
