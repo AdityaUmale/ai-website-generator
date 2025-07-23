@@ -57,21 +57,45 @@ export default function WebsitePreview({
   useEffect(() => {
     const formatCode = async () => {
       try {
-        const formatted = await prettier.format(currentPageContent, {
+        // First, format the original content
+        const formattedOriginal = await prettier.format(currentPageContent, {
           parser: 'babel',
-          plugins: [babel as any, estree as any],
+          plugins: [babel.default, estree.default],
           semi: true,
           trailingComma: 'es5',
           singleQuote: true,
           printWidth: 80,
         });
-        setFormattedCode(formatted);
+    
+        // Wrap in Next.js page structure
+        const wrappedCode = `'use client';
+    
+        import React from 'react';
+        // Add other common imports as needed, e.g.
+        // import Link from 'next/link';
+        // import Image from 'next/image';
+    
+        const Page = ${formattedOriginal};
+    
+        export default Page;`;
+    
+        // Format the wrapped code
+        const formattedWrapped = await prettier.format(wrappedCode, {
+          parser: 'babel',
+          plugins: [babel.default, estree.default],
+          semi: true,
+          trailingComma: 'es5',
+          singleQuote: true,
+          printWidth: 80,
+        });
+    
+        setFormattedCode(formattedWrapped);
       } catch (error) {
         console.error('Formatting error:', error);
-        setFormattedCode(currentPageContent); // Fallback to unformatted
+        setFormattedCode(currentPageContent); // Fallback
       }
     };
-
+  
     if (currentPageContent) {
       formatCode();
     }
