@@ -42,11 +42,6 @@ cd ../frontend
 npm install
 ```
 
-Install additional packages if needed (e.g., for code formatting):
-```bash
-npm install react-syntax-highlighter prettier prettier-plugin-babel @babel/standalone
-```
-
 ### 4. Set up environment variables
 
 In `backend/`, create a `.env` file:
