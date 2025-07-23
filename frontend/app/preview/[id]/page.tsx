@@ -23,6 +23,7 @@ export default function PreviewPage() {
   const [editingElement, setEditingElement] = useState<{
     elementId: string;
     content: string;
+    currentStyles: Record<string, any>;
   } | null>(null);
 
   useEffect(() => {
@@ -50,15 +51,16 @@ export default function PreviewPage() {
     }
   };
 
-  const handleSaveEdit = async (elementId: string, newContent: string) => {
+  const handleSaveEdit = async (elementId: string, newContent: string, newStyles?: Record<string, any>) => {
     try {
-      await websiteApi.saveEdit(websiteId, elementId, newContent);
+      await websiteApi.saveEdit(websiteId, elementId, newContent, newStyles);
       
       // Update local edits
       const newEdit: ElementEdit = {
         siteId: websiteId,
         elementId,
-        content: newContent
+        content: newContent,
+        styles: newStyles
       };
       
       setEdits(prev => {
@@ -158,7 +160,7 @@ export default function PreviewPage() {
             website={website}
             currentPage={currentPage}
             edits={edits}
-            onElementClick={setEditingElement}
+            onElementClick={(elementId, content, currentStyles) => setEditingElement({ elementId, content, currentStyles: currentStyles || {} })}
             onPageChange={setCurrentPage}
           />
         </div>
@@ -169,6 +171,7 @@ export default function PreviewPage() {
         <EditModal
           elementId={editingElement.elementId}
           currentContent={editingElement.content}
+          currentStyles={editingElement.currentStyles}
           onSave={handleSaveEdit}
           onClose={() => setEditingElement(null)}
         />

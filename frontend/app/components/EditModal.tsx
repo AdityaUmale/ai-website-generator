@@ -6,15 +6,17 @@ import { X, Save } from 'lucide-react';
 interface EditModalProps {
   elementId: string;
   currentContent: string;
-  onSave: (elementId: string, newContent: string) => void;
+  currentStyles?: Record<string, any>;
+  onSave: (elementId: string, newContent: string, newStyles?: Record<string, any>) => void;
   onClose: () => void;
 }
 
-export default function EditModal({ elementId, currentContent, onSave, onClose }: EditModalProps) {
+export default function EditModal({ elementId, currentContent, currentStyles = {}, onSave, onClose }: EditModalProps) {
   const [content, setContent] = useState(currentContent);
+  const [styles, setStyles] = useState<Record<string, any>>(currentStyles);
 
   const handleSave = () => {
-    onSave(elementId, content);
+    onSave(elementId, content, styles);
   };
 
   return (
@@ -39,6 +41,23 @@ export default function EditModal({ elementId, currentContent, onSave, onClose }
             value={content}
             onChange={(e) => setContent(e.target.value)}
             className="w-full h-24 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+          />
+          <label htmlFor="styles" className="block text-sm font-medium text-gray-700 mb-2 mt-4">
+            Inline Styles (property:value per line)
+          </label>
+          <textarea
+            id="styles"
+            value={Object.entries(styles).map(([k,v])=>`${k}:${v}`).join('\n')}
+            onChange={(e)=>{
+              const lines=e.target.value.split('\n');
+              const newStyles:Record<string,any>={};
+              lines.forEach(line=>{
+                const [prop,val]=line.split(':');
+                if(prop && val){newStyles[prop.trim()]=val.trim();}
+              });
+              setStyles(newStyles);
+            }}
+            className="w-full h-24 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none mt-1"
           />
         </div>
         

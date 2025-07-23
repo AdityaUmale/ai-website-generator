@@ -16,7 +16,7 @@ interface WebsitePreviewProps {
   website: GeneratedWebsite;
   currentPage: string;
   edits: ElementEdit[];
-  onElementClick: Dispatch<SetStateAction<{ elementId: string; content: string; } | null>>;
+  onElementClick: (elementId: string, content: string, currentStyles?: Record<string, any>) => void;
   onPageChange?: (pageName: string) => void;
 }
 
@@ -36,7 +36,7 @@ export default function WebsitePreview({
     edits.forEach(edit => {
       if (edit.content) {
         const regex = new RegExp(
-          `(<[^>]*data-edit-id="${edit.elementId}"[^>]*>)([^<]*)(</[^>]*>)`,
+          `(<[^>]*data-edit-id=["']${edit.elementId}["'][^>]*>)([^<]*)(</[^>]*>)`,
           'g'
         );
         modifiedContent = modifiedContent.replace(regex, `$1${edit.content}$3`);
@@ -48,9 +48,19 @@ export default function WebsitePreview({
 
   const makeElementsEditable = (content: string): string => {
     return content.replace(
-      /data-edit-id="([^"]*)"([^>]*)>/g,
-      (match, editId, attributes) => {
-        return `data-edit-id="${editId}"${attributes} class="editable-element">`;
+      /data-edit-id=(['"])([^'"]*)\1([^>]*)>/g,
+      (match, quote, editId, attributes) => {
+        // Check for both class and className attributes
+        const hasClassName = /className=(['"])[^'"]*\1/.test(attributes);
+        const hasClass = /class=(['"])[^'"]*\1/.test(attributes);
+        
+        if (hasClassName) {
+          return `data-edit-id=${quote}${editId}${quote}${attributes.replace(/className=(['"])([^'"]*)\1/, `className=$1$2 editable-element$1`)}>`;
+        } else if (hasClass) {
+          return `data-edit-id=${quote}${editId}${quote}${attributes.replace(/class=(['"])([^'"]*)\1/, `class=$1$2 editable-element$1`)}>`;
+        } else {
+          return `data-edit-id=${quote}${editId}${quote}${attributes} className="editable-element">`;
+        }
       }
     );
   };
@@ -76,6 +86,21 @@ export default function WebsitePreview({
   };
 
   const currentPageContent = website.pages[currentPage];
+
+  // Apply text edits and mark editable elements
+  const processedContent = currentPageContent ? makeElementsEditable(applyEdits(currentPageContent)) : '';
+
+  useEffect(() => {
+    if (processedContent) {
+      console.log('Processed content sample:', processedContent.substring(0, 500));
+      console.log('Contains editable-element:', processedContent.includes('editable-element'));
+      console.log('Contains data-edit-id:', processedContent.includes('data-edit-id'));
+      
+      // Test our regex
+      const matches = processedContent.match(/data-edit-id="([^"]*)"/g);
+      console.log('Found data-edit-id matches:', matches);
+    }
+  }, [processedContent]);
 
   useEffect(() => {
     const formatCode = async () => {
@@ -129,6 +154,22 @@ export default Page;`;
     }
   }, [currentPageContent, currentPage]);
 
+  useEffect(() => {
+    const previewContainer = document.querySelector('.preview-container');
+    if (!previewContainer) return;
+
+    edits.forEach(edit => {
+      if (edit.styles && Object.keys(edit.styles).length > 0) {
+        const element = previewContainer.querySelector(`[data-edit-id="${edit.elementId}"]`) as HTMLElement;
+        if (element) {
+          Object.entries(edit.styles).forEach(([prop, value]) => {
+            element.style.setProperty(prop, value as string);
+          });
+        }
+      }
+    });
+  }, [edits, processedContent]);
+
   if (!currentPageContent) {
     return (
       <div className="flex-1 bg-white rounded-lg shadow p-8 text-center">
@@ -139,7 +180,7 @@ export default Page;`;
 
   let DynamicPage;
   try {
-    const transpiled = Babel.transform(currentPageContent, {
+    const transpiled = Babel.transform(processedContent, {
       presets: ['react'],
     }).code;
 
@@ -186,6 +227,10 @@ export default Page;`;
                 onClick={(e) => {
                   const target = e.target as HTMLElement;
                   
+                  console.log('Click detected on:', target);
+                  console.log('Target classes:', target.className);
+                  console.log('Target data-edit-id:', target.getAttribute('data-edit-id'));
+                  
                   // Handle navigation clicks first
                   const navPage = target.getAttribute('data-nav-page') || target.closest('[data-nav-page]')?.getAttribute('data-nav-page');
                   if (navPage && onPageChange) {
@@ -203,11 +248,14 @@ export default Page;`;
                   
                   // Handle editable element clicks
                   const editableElement = target.closest('.editable-element') as HTMLElement;
+                  console.log('Found editable element:', editableElement);
                   if (editableElement) {
                     const elementId = editableElement.getAttribute('data-edit-id');
+                    console.log('Element ID:', elementId);
                     if (elementId) {
                       const content = editableElement.textContent || '';
-                      onElementClick({ elementId, content });
+                      console.log('Element content:', content);
+                      onElementClick(elementId, content, {});
                     }
                   }
                 }}

@@ -91,7 +91,7 @@ export const websiteApi = {
 
   saveEdit: async (id: string, elementId: string, content?: string, styles?: Record<string, any>) => {
     try {
-      const response = await api.post(`/api/website/${id}/edit`, {
+      const response = await api.put(`/api/website/${id}/edit`, {
         elementId,
         content,
         styles
