@@ -1,36 +1,123 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Website Generator
 
-## Getting Started
+## Overview
 
-First, run the development server:
+AI Website Generator is an MVP application that uses AI to create multi-page websites based on user descriptions. It features website generation powered by OpenAI, live previews, visual content editing, code viewing with syntax highlighting and formatting, and temporary storage of generated sites.
+
+The project consists of:
+- **Backend**: Node.js server handling AI generation and API endpoints
+- **Frontend**: Next.js application for user interface, preview, and editing
+
+## Prerequisites
+
+- Node.js (v18 or later)
+- npm or yarn
+- OpenAI API key (set in .env file in backend)
+
+## Installation
+
+### 1. Clone the repository
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <repository-url>
+cd ai-website-generator
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Install backend dependencies
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+cd backend
+npm install
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+If using jsonrepair (for JSON parsing fixes):
+```bash
+npm install --save jsonrepair
+```
 
-## Learn More
+### 3. Install frontend dependencies
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+cd ../frontend
+npm install
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Install additional packages if needed (e.g., for code formatting):
+```bash
+npm install react-syntax-highlighter prettier prettier-plugin-babel @babel/standalone
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 4. Set up environment variables
 
-## Deploy on Vercel
+In `backend/`, create a `.env` file:
+```
+OPENAI_API_KEY=your-openai-key
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Running the Application
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 1. Start the backend server
+
+```bash
+cd backend
+npm run dev  
+```
+
+The backend runs on port 3001 by default.
+
+### 2. Start the frontend development server
+
+```bash
+cd frontend
+npm run dev
+```
+
+The frontend runs on port 3000.
+
+Open http://localhost:3000 in your browser.
+
+## Usage
+
+### 1. Generate a Website
+- Enter a description (e.g., "A pet store website with home, about, services, and contact pages")
+- Click "Generate" to create the site using AI
+- The generated site will be previewed with navigation between pages
+
+### 2. Preview and Navigate
+- Use the navigation links to switch pages
+- Toggle between rendered preview and code view
+
+### 3. View Code
+- In code view, see formatted JSX with syntax highlighting (powered by react-syntax-highlighter and Prettier)
+
+### 4. Edit Content
+- Click editable elements (marked with `data-edit-id`) to open a modal
+- Update text content or styles (e.g., color, background, font size)
+- Changes apply immediately and are stored temporarily
+
+### 5. Troubleshooting
+- If JSON parsing errors occur in backend, ensure jsonrepair is installed and integrated in `aiService.ts`
+- Check console logs for detailed errors
+
+## Features Implemented
+
+- ✅ AI-powered website generation from descriptions
+- ✅ Multi-page previews with navigation
+- ✅ Code view with formatting and highlighting
+- ✅ Visual content and style editing
+- ✅ Temporary storage of generated sites
+
+## Future Improvements
+
+- Persistent storage (e.g., database integration)
+- Advanced visual editing (drag-and-drop)
+- Export generated sites as deployable code
+
+## Tech Stack
+
+- **Frontend**: Next.js, React, Tailwind CSS
+- **Backend**: Node.js, Express, OpenAI API
+- **Code Highlighting**: react-syntax-highlighter
+- **Code Formatting**: Prettier
+
+
