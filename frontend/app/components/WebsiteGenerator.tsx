@@ -4,13 +4,25 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { websiteApi } from '@/lib/api';
 import { GenerationResponse } from '@/types';
-import { Loader2, Globe, Sparkles, AlertCircle } from 'lucide-react';
+import { Loader2, Globe, Sparkles, AlertCircle, Lightbulb, ArrowRight } from 'lucide-react';
 
 export default function WebsiteGenerator() {
   const [description, setDescription] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  const examplePrompts = [
+    "A modern pet adoption website called Pet Paradise with home, about, services, and contact pages",
+    "A professional restaurant website with menu, reservations, about us, and contact information",
+    "A fitness gym website with class schedules, membership plans, trainer profiles, and contact details",
+    "A tech startup landing page with product features, pricing, team, and contact sections"
+  ];
+
+  const handleExampleClick = (example: string) => {
+    setDescription(example);
+    setError(null);
+  };
 
   const handleGenerate = async () => {
     if (!description.trim()) {
@@ -55,69 +67,111 @@ export default function WebsiteGenerator() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <div className="text-center mb-8">
-        <div className="flex items-center justify-center mb-4">
-          <Globe className="w-8 h-8 text-blue-600 mr-2" />
-          <h1 className="text-3xl font-bold text-gray-900">AI Website Generator</h1>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="container mx-auto px-4 py-12">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="flex items-center justify-center mb-6">
+            <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mr-4">
+              <Globe className="w-8 h-8 text-white" />
+            </div>
+            <h1 className="text-4xl font-bold text-gray-900">
+              AI Website Generator
+            </h1>
+          </div>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Describe your dream website and watch AI create a complete, professional website with 
+            navigation, multiple pages, and modern design in seconds.
+          </p>
         </div>
-        <p className="text-gray-600">
-          Describe your ideal website and watch AI bring it to life
-        </p>
-      </div>
 
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-          Website Description
-        </label>
-        <textarea
-          id="description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="e.g., I want a website for a mindfulness coach with 3 pages: Home, About, Contact. It should have a calming design with nature colors..."
-          className="w-full h-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-          disabled={isGenerating}
-        />
-
-        {error && (
-          <div className="mt-3 p-4 bg-red-50 border border-red-200 rounded-md">
-            <div className="flex items-start">
-              <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 mr-2 flex-shrink-0" />
+        {/* Main Content */}
+        <div className="max-w-4xl mx-auto">
+          {/* Generation Form */}
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 mb-8">
+            <div className="flex items-center mb-6">
+              <Sparkles className="w-6 h-6 text-purple-600 mr-3" />
+              <h2 className="text-2xl font-bold text-gray-900">Create Your Website</h2>
+            </div>
+            
+            <div className="space-y-6">
               <div>
-                <p className="text-sm text-red-600">{error}</p>
-                <p className="text-xs text-red-500 mt-1">
-                  Tip: Try a shorter, more specific description if the request is timing out.
-                </p>
+                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-3">
+                  Describe your website
+                </label>
+                <textarea
+                  id="description"
+                  value={description}
+                  onChange={(e) => {
+                    setDescription(e.target.value);
+                    setError(null);
+                  }}
+                  placeholder="e.g., A modern pet adoption website with home, about, services, and contact pages..."
+                  className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all"
+                  rows={4}
+                  disabled={isGenerating}
+                />
               </div>
+
+              <button
+                onClick={handleGenerate}
+                disabled={isGenerating || !description.trim()}
+                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-4 px-6 rounded-xl font-semibold text-lg hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center"
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-3 animate-spin" />
+                    Generating your website...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-5 h-5 mr-3" />
+                    Generate Website
+                    <ArrowRight className="w-5 h-5 ml-3" />
+                  </>
+                )}
+              </button>
+
+              {error && (
+                <div className="flex items-center p-4 bg-red-50 border border-red-200 rounded-xl">
+                  <AlertCircle className="w-5 h-5 text-red-600 mr-3 flex-shrink-0" />
+                  <p className="text-red-700 text-sm">{error}</p>
+                </div>
+              )}
             </div>
           </div>
-        )}
 
-        <button
-          onClick={handleGenerate}
-          disabled={isGenerating || !description.trim()}
-          className="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-        >
-          {isGenerating ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Generating Website... (This may take up to 2 minutes)
-            </>
-          ) : (
-            <>
-              <Sparkles className="w-4 h-4 mr-2" />
-              Generate Website
-            </>
-          )}
-        </button>
-
-        {isGenerating && (
-          <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
-            <p className="text-sm text-blue-600">
-              🤖 AI is working on your website... This usually takes 30-60 seconds.
-            </p>
+          {/* Example Prompts */}
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+            <div className="flex items-center mb-6">
+              <Lightbulb className="w-6 h-6 text-yellow-500 mr-3" />
+              <h3 className="text-xl font-bold text-gray-900">Need inspiration? Try these examples:</h3>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {examplePrompts.map((example, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleExampleClick(example)}
+                  className="text-left p-4 border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 group"
+                  disabled={isGenerating}
+                >
+                  <p className="text-sm text-gray-700 group-hover:text-blue-700">
+                    "{example}"
+                  </p>
+                </button>
+              ))}
+            </div>
+            
+            <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-200">
+              <p className="text-sm text-gray-700">
+                <span className="font-medium">💡 Pro tip:</span> Be specific about your business type, desired pages, 
+                and any special features you want. The AI will create a complete website with navbar, footer, 
+                and professional navigation between pages.
+              </p>
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

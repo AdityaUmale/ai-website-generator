@@ -113,34 +113,60 @@ Key requirements:
 - Mobile-first responsive design
 - Add data-edit-id="unique-id" to ALL editable elements
 - Generate realistic content matching the purpose
-- Use Unsplash images: https://images.unsplash.com/photo-[id]?w=800&h=600&fit=crop`;
+- Use Unsplash images: https://images.unsplash.com/photo-[id]?w=800&h=600&fit=crop
+- Include proper navigation structure with navbar and footer
+- Create professional, modern UI with excellent UX
+- Ensure consistent navigation across all pages
+- CRITICAL: Use data-nav-page="pagename" instead of href for navigation links`;
   }
 
   private static createWebsitePrompt(description: string): string {
-    return `Generate a professional website for: "${description}"
+    return `
+Generate a complete Next.js website based on this description: "${description}"
 
-IMPORTANT: Write ALL JSX code as single-line strings without line breaks to ensure valid JSON.
+Determine the appropriate pages from the description (e.g., if user requests Home, About, Services, use keys like "home", "about", "services"). Always include a home page as "index".
 
-JSON format:
+Return ONLY a valid JSON object with this structure:
 {
   "pages": {
-    "index": "() => { return (<div>ALL JSX IN ONE LINE</div>); }",
-    "about": "() => { return (<div>ALL JSX IN ONE LINE</div>); }",
-    "contact": "() => { return (<div>ALL JSX IN ONE LINE</div>); }"
+    "index": "() => { return (/* JSX for home page */); }",
+    "page1": "() => { return (/* JSX for page1 */); }",
+    // Add more pages as needed based on description
   },
-  "styles": "/* CSS styles */",
-  "metadata": {"title": "Site Title", "description": "Site description", "theme": "blue"}
+  "styles": "/* Global CSS styles */"
 }
 
-Requirements:
-- Tailwind CSS only, responsive design
-- data-edit-id on all headings, text, buttons
-- Realistic content with navigation
-- Modern design with hover effects
-- Single-line JSX to avoid JSON parsing errors
+CRITICAL REQUIREMENTS:
+1. Generate functional React JSX components using modern syntax
+2. Use Tailwind CSS for styling with modern design patterns
+3. Add data-edit-id="unique-id" to all editable elements (headings, text, buttons)
+4. Make it responsive and visually appealing
+5. Do NOT include any imports or 'export default' - write pure JSX functions
+6. Each page should be a function returning JSX that can be rendered directly
 
-Example single-line JSX:
-"() => { return (<div className='min-h-screen'><header className='bg-blue-600 text-white p-4'><h1 data-edit-id='title'>Title</h1></header><main className='container mx-auto p-8'><section className='text-center'><h2 data-edit-id='hero'>Hero Text</h2><button data-edit-id='cta' className='bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600'>Click Me</button></section></main></div>); }"`;
+NAVIGATION REQUIREMENTS:
+7. Include a professional navbar at the top of EVERY page with navigation links
+8. Add a footer section at the bottom of EVERY page
+9. On the home page, include prominent navigation buttons/cards to access other pages
+10. Use consistent navigation structure across all pages
+11. Make navigation visually appealing with hover effects and modern styling
+12. CRITICAL: Use data-nav-page="pagename" instead of href for navigation links
+13. Navigation should be buttons or clickable divs with data-nav-page attributes
+14. NEVER use <a href="/page"> - always use data-nav-page="page" for internal navigation
+
+NAVIGATION EXAMPLES:
+- Navbar: <button data-nav-page="about" className="nav-link">About</button>
+- Footer: <div data-nav-page="contact" className="footer-link cursor-pointer">Contact</div>
+- Home buttons: <button data-nav-page="services" className="cta-button">Our Services</button>
+
+UI/UX REQUIREMENTS:
+15. Use modern color schemes and typography
+16. Include hero sections, call-to-action buttons, and engaging content
+17. Add appropriate icons and visual elements
+18. Ensure excellent mobile responsiveness
+19. Create professional layouts with proper spacing and visual hierarchy
+20. Use gradients, shadows, and modern CSS effects for visual appeal
+`;
   }
 
   static async editElement(elementId: string, newContent: string, currentPageCode: string): Promise<string> {

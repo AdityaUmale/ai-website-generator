@@ -8,6 +8,7 @@ import { ArrowLeft, Edit3 } from 'lucide-react';
 import PageNavigation from '../../components/PageNavigation';
 import WebsitePreview from '../../components/WebsitePreview';
 import EditModal from '../../components/EditModal';
+import WebsiteInfo from '../../components/WebsiteInfo';
 
 export default function PreviewPage() {
   const params = useParams();
@@ -110,22 +111,30 @@ export default function PreviewPage() {
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-20">
             <div className="flex items-center">
               <button
                 onClick={handleBack}
-                className="flex items-center text-gray-600 hover:text-gray-900 mr-4"
+                className="flex items-center text-gray-600 hover:text-gray-900 transition-colors mr-6 px-3 py-2 rounded-lg hover:bg-gray-100"
               >
-                <ArrowLeft className="w-5 h-5 mr-1" />
-                Back
+                <ArrowLeft className="w-5 h-5 mr-2" />
+                Back to Generator
               </button>
-              <h1 className="text-lg font-semibold text-gray-900">Website Preview</h1>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">Website Preview & Editor</h1>
+                <p className="text-sm text-gray-500 mt-1">
+                  Navigate between pages and click any element to edit content
+                </p>
+              </div>
             </div>
             
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center text-sm text-gray-500">
-                <Edit3 className="w-4 h-4 mr-1" />
-                Click any element to edit
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center text-sm text-gray-600 bg-blue-50 px-3 py-2 rounded-lg">
+                <Edit3 className="w-4 h-4 mr-2 text-blue-600" />
+                <span>Click elements to edit</span>
+              </div>
+              <div className="text-sm text-gray-500">
+                <span className="font-medium">{pageNames.length}</span> pages generated
               </div>
             </div>
           </div>
@@ -133,6 +142,9 @@ export default function PreviewPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Website Info */}
+        <WebsiteInfo pageCount={pageNames.length} currentPage={currentPage} />
+        
         <div className="flex gap-6">
           {/* Page Navigation */}
           <PageNavigation
@@ -147,6 +159,7 @@ export default function PreviewPage() {
             currentPage={currentPage}
             edits={edits}
             onElementClick={setEditingElement}
+            onPageChange={setCurrentPage}
           />
         </div>
       </div>

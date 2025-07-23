@@ -16,13 +16,15 @@ interface WebsitePreviewProps {
   currentPage: string;
   edits: ElementEdit[];
   onElementClick: Dispatch<SetStateAction<{ elementId: string; content: string; } | null>>;
+  onPageChange?: (pageName: string) => void;
 }
 
 export default function WebsitePreview({ 
   website, 
   currentPage, 
   edits, 
-  onElementClick 
+  onElementClick,
+  onPageChange 
 }: WebsitePreviewProps) {
   const [viewMode, setViewMode] = useState<'preview' | 'code'>('preview');
   const [formattedCode, setFormattedCode] = useState<string>('');
@@ -50,6 +52,26 @@ export default function WebsitePreview({
         return `data-edit-id="${editId}"${attributes} class="editable-element">`;
       }
     );
+  };
+
+  // Handle navigation clicks within the generated website
+  const handleNavigationClick = (event: Event) => {
+    const target = event.target as HTMLElement;
+    const navPage = target.getAttribute('data-nav-page') || target.closest('[data-nav-page]')?.getAttribute('data-nav-page');
+    
+    if (navPage && onPageChange) {
+      event.preventDefault();
+      event.stopPropagation();
+      
+      // Convert page names to match the website structure
+      let targetPage = navPage.toLowerCase();
+      if (targetPage === 'home') targetPage = 'index';
+      
+      // Check if the page exists in the website
+      if (website.pages[targetPage]) {
+        onPageChange(targetPage);
+      }
+    }
   };
 
   const currentPageContent = website.pages[currentPage];
@@ -152,9 +174,38 @@ export default function WebsitePreview({
           </div>
           
           <div className="p-4">
-            // The code view remains the same, now using the defined formattedCode
             {viewMode === 'preview' ? (
-              <div className="preview-container bg-white min-h-96">
+              <div 
+                className="preview-container bg-white min-h-96"
+                onClick={(e) => {
+                  const target = e.target as HTMLElement;
+                  
+                  // Handle navigation clicks first
+                  const navPage = target.getAttribute('data-nav-page') || target.closest('[data-nav-page]')?.getAttribute('data-nav-page');
+                  if (navPage && onPageChange) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    let targetPage = navPage.toLowerCase();
+                    if (targetPage === 'home') targetPage = 'index';
+                    
+                    if (website.pages[targetPage]) {
+                      onPageChange(targetPage);
+                      return;
+                    }
+                  }
+                  
+                  // Handle editable element clicks
+                  const editableElement = target.closest('.editable-element') as HTMLElement;
+                  if (editableElement) {
+                    const elementId = editableElement.getAttribute('data-edit-id');
+                    if (elementId) {
+                      const content = editableElement.textContent || '';
+                      onElementClick({ elementId, content });
+                    }
+                  }
+                }}
+              >
                 <DynamicPage />
               </div>
             ) : (
@@ -193,6 +244,22 @@ export default function WebsitePreview({
           font-size: 12px;
           white-space: nowrap;
           z-index: 10;
+        }
+        
+        /* Navigation element styles */
+        [data-nav-page] {
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        
+        [data-nav-page]:hover {
+          opacity: 0.8;
+          transform: translateY(-1px);
+        }
+        
+        /* Prevent text selection on navigation elements */
+        [data-nav-page] {
+          user-select: none;
         }
       `}</style>
     </>
